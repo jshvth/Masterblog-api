@@ -18,7 +18,22 @@ def get_next_id():
 # GET /api/posts
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
-    return jsonify(POSTS), 200
+    sort_by = request.args.get('sort')        # title oder content
+    direction = request.args.get('direction') # asc oder desc
+
+    # Liste kopieren, um Original nicht zu verändern
+    sorted_posts = POSTS.copy()
+
+    if sort_by:
+        if sort_by not in ['title', 'content']:
+            return jsonify({"error": "Invalid sort field. Use 'title' or 'content'."}), 400
+        if direction and direction not in ['asc', 'desc']:
+            return jsonify({"error": "Invalid direction. Use 'asc' or 'desc'."}), 400
+
+        reverse = (direction == 'desc')
+        sorted_posts.sort(key=lambda post: post[sort_by].lower(), reverse=reverse)
+
+    return jsonify(sorted_posts), 200
 
 # POST /api/posts
 @app.route('/api/posts', methods=['POST'])
